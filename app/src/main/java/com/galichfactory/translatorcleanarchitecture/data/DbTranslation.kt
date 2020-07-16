@@ -4,4 +4,6 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-data class DbTranslation(@PrimaryKey val uid: Int, val language: String, val translation: String)
+data class DbTranslation(val language: String, @PrimaryKey val translation: String) {
+    public constructor() : this("", "")
+}

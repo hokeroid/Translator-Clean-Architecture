@@ -1,12 +1,15 @@
 package com.galichfactory.translatorcleanarchitecture.data
 
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.Update
+import androidx.room.*
 
 @Dao
 interface WordDao {
+    @Query("SELECT * FROM DbWord")
+    fun getAll(): List<DbWord>
+
+    @Query("SELECT * FROM DbWord WHERE wordName = :wordName")
+    fun getById(wordName: String): DbWord
+
     @Insert
     fun insert(word: DbWord)
 
