@@ -9,31 +9,36 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 
 class RepositoryImpl : Repository {
-    private fun mapDictionaryToDbWords(dictionary: Dictionary): List<DbWord> {
-        val dbWords: MutableList<DbWord> = mutableListOf()
+    private fun mapDictionaryToDbWords(dictionary: Dictionary): List<DbWordWithTranslations> {
+        val dbWordsWithTranslations: MutableList<DbWordWithTranslations> = mutableListOf()
         for (word in dictionary.words) {
             val dbTranslations: MutableList<DbTranslation> = mutableListOf()
             for (translation in word.translations) {
                 dbTranslations.add(
                     DbTranslation(
                         language = translation.language,
-                        translation = translation.translation
+                        translation = translation.translation,
+                        parentWord = word.wordName
                     )
                 )
             }
 
-            val dbWord = DbWord(translations = dbTranslations, wordName = word.wordName)
-            dbWords.add(dbWord)
+            val dbWordWithTranslations =
+                DbWordWithTranslations(
+                    dbTranslations = dbTranslations,
+                    dbWord = DbWord(word = word.wordName)
+                )
+            dbWordsWithTranslations.add(dbWordWithTranslations)
         }
-        return dbWords
+        return dbWordsWithTranslations
     }
 
-    private fun mapDbWordsToDictionary(dbWords: List<DbWord>) : Dictionary {
+    private fun mapDbWordsToDictionary(dbWordsWithTranslations: List<DbWordWithTranslations>): Dictionary {
         val dictionary = Dictionary(mutableListOf())
 
-        for (dbWord in dbWords) {
+        for (dbWordWithTranslation in dbWordsWithTranslations) {
             val translations: MutableList<Translation> = mutableListOf()
-            for (dbTranslation in dbWord.translations) {
+            for (dbTranslation in dbWordWithTranslation.dbTranslations) {
                 translations.add(
                     Translation(
                         language = dbTranslation.language,
@@ -42,7 +47,7 @@ class RepositoryImpl : Repository {
                 )
             }
 
-            val word = Word(translations = translations, wordName = dbWord.wordName)
+            val word = Word(translations = translations, wordName = dbWordWithTranslation.dbWord.word)
             dictionary.words.add(word)
         }
         return dictionary
@@ -57,9 +62,13 @@ class RepositoryImpl : Repository {
     override fun setDictionary(context: Context, dictionary: Dictionary) {
         val db = AppDatabase.create(context)
 
+        db.clearAllTables() //TODO erase this when stop testing
+
         val dbWords = mapDictionaryToDbWords(dictionary)
         for (dbWord in dbWords) {
-            db.wordDao().insert(dbWord)
+            db.wordDao().insert(dbWord.dbWord)
+            for (dbTranslation in dbWord.dbTranslations)
+                db.wordDao().insert(dbTranslation)
         }
     }
 

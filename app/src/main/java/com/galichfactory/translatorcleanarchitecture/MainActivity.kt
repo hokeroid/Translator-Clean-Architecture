@@ -1,6 +1,7 @@
 package com.galichfactory.translatorcleanarchitecture
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.galichfactory.translatorcleanarchitecture.domain.Dictionary
 import com.galichfactory.translatorcleanarchitecture.domain.Translation
@@ -30,6 +31,7 @@ class MainActivity : AppCompatActivity() {
         repositoryImpl.setDictionary(context = applicationContext, dictionary = dictionary)
 
         val newDictionary = repositoryImpl.getDictionary(context = applicationContext)
-        print(newDictionary.words)
+        Toast.makeText(applicationContext, newDictionary.words[0].wordName, Toast.LENGTH_SHORT)
+            .show()
     }
 }
