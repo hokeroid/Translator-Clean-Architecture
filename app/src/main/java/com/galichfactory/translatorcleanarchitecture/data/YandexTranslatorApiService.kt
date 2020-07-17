@@ -1,6 +1,6 @@
 package com.galichfactory.translatorcleanarchitecture.data
 
-import io.reactivex.Observable
+import io.reactivex.Single
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
@@ -13,7 +13,7 @@ interface YandexTranslatorApiService {
     fun getTranslation(
         @Body body: YandexTranslatorQueryBody,
         @HeaderMap headers: Map<String, String>
-    ): Observable<Result>
+    ): Single<Result>
 
     companion object Factory {
         fun create(): YandexTranslatorApiService {

@@ -7,17 +7,28 @@ import com.galichfactory.translatorcleanarchitecture.domain.Dictionary
 import com.galichfactory.translatorcleanarchitecture.domain.Translation
 import com.galichfactory.translatorcleanarchitecture.domain.Word
 import com.galichfactory.translatorcleanarchitecture.repository.RepositoryImpl
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        testDb()
+        testYandexApi()
     }
 
     fun testYandexApi() {
         val repositoryImpl = RepositoryImpl()
         repositoryImpl.getTranslation("Hello world", "ru")
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(Schedulers.io())
+            .subscribe(
+                { translation ->
+                    Toast.makeText(applicationContext, translation.translation, Toast.LENGTH_SHORT).show()
+                },
+                { error ->
+                    error.printStackTrace()
+                })
     }
 
     fun testDb() {
