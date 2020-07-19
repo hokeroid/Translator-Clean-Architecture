@@ -1,6 +1,7 @@
 package com.galichfactory.translatorcleanarchitecture.presentation.view
 
 import android.os.Bundle
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.Spinner
 import android.widget.Toast
@@ -26,26 +27,42 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val repository = RepositoryImpl()
+
+        words = repository.getWords(context = applicationContext).toMutableList()
+
         translateButton = findViewById(R.id.translateButton)
         searchField = findViewById(R.id.searchField)
         languageSpinner = findViewById(R.id.languageSpinner)
         wordsRecyclerView = findViewById(R.id.wordsRecyclerView)
 
-        translateButton.setOnClickListener {  } //TODO
+        val spinnerAdapter = ArrayAdapter.createFromResource(this, R.array.languages, android.R.layout.simple_spinner_item)
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
-        languageSpinner
+        languageSpinner.adapter = spinnerAdapter
 
         wordsRecyclerView.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = WordListAdapter(words)
         }
 
-        testYandexApi()
-        testYandexApi()
-        testYandexApi()
-        testYandexApi()
-        testYandexApi()
-        testYandexApi()
+        translateButton.setOnClickListener {
+            val text = searchField.editableText.toString()
+            val lang = languageSpinner.selectedItem.toString()
+
+            repository.getTranslation(text, lang).observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(
+                    { word ->
+                        Toast.makeText(applicationContext, "${word.originalText}: ${word.translatedText}", Toast.LENGTH_SHORT).show()
+                        words.add(word)
+                        wordsRecyclerView.adapter?.notifyDataSetChanged()
+                        repository.setWords(applicationContext, words)
+                    },
+                    { error ->
+                        error.printStackTrace()
+                    })
+        }
     }
 
     private fun testYandexApi() {
