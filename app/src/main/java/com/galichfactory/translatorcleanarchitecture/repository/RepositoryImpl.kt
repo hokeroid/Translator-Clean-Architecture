@@ -2,84 +2,47 @@ package com.galichfactory.translatorcleanarchitecture.repository
 
 import android.content.Context
 import com.galichfactory.translatorcleanarchitecture.data.*
-import com.galichfactory.translatorcleanarchitecture.domain.Dictionary
-import com.galichfactory.translatorcleanarchitecture.domain.Translation
 import com.galichfactory.translatorcleanarchitecture.domain.Word
 import io.reactivex.Single
 
 class RepositoryImpl : Repository {
-    private fun mapDictionaryToDbWords(dictionary: Dictionary): List<DbWordWithTranslations> {
-        val dbWordsWithTranslations: MutableList<DbWordWithTranslations> = mutableListOf()
-        for (word in dictionary.words) {
-            val dbTranslations: MutableList<DbTranslation> = mutableListOf()
-            for (translation in word.translations) {
-                dbTranslations.add(
-                    DbTranslation(
-                        language = translation.language,
-                        translation = translation.translation,
-                        parentWord = word.wordName
-                    )
-                )
-            }
 
-            val dbWordWithTranslations =
-                DbWordWithTranslations(
-                    dbTranslations = dbTranslations,
-                    dbWord = DbWord(word = word.wordName)
-                )
-            dbWordsWithTranslations.add(dbWordWithTranslations)
-        }
-        return dbWordsWithTranslations
-    }
-
-    private fun mapDbWordsToDictionary(dbWordsWithTranslations: List<DbWordWithTranslations>): Dictionary {
-        val dictionary = Dictionary(mutableListOf())
-
-        for (dbWordWithTranslation in dbWordsWithTranslations) {
-            val translations: MutableList<Translation> = mutableListOf()
-            for (dbTranslation in dbWordWithTranslation.dbTranslations) {
-                translations.add(
-                    Translation(
-                        language = dbTranslation.language,
-                        translation = dbTranslation.translation
-                    )
-                )
-            }
-
-            val word =
-                Word(translations = translations, wordName = dbWordWithTranslation.dbWord.word)
-            dictionary.words.add(word)
-        }
-        return dictionary
-    }
-
-    override fun getDictionary(context: Context): Dictionary {
+    override fun getWords(context: Context): List<Word> {
         val db = AppDatabase.create(context)
 
-        return mapDbWordsToDictionary(db.wordDao().getAll())
-    }
-
-    override fun setDictionary(context: Context, dictionary: Dictionary) {
-        val db = AppDatabase.create(context)
-
-        db.clearAllTables() //TODO erase this when stop testing
-
-        val dbWords = mapDictionaryToDbWords(dictionary)
-        for (dbWord in dbWords) {
-            db.wordDao().insert(dbWord.dbWord)
-            for (dbTranslation in dbWord.dbTranslations)
-                db.wordDao().insert(dbTranslation)
+        return db.wordDao().getAll().map { dbWord: DbWord ->
+            Word(
+                originalText = dbWord.originalText,
+                originalLanguage = dbWord.originalLanguage,
+                translatedText = dbWord.translatedText,
+                translatedLanguage = dbWord.translatedLanguage
+            )
         }
     }
 
-    override fun getTranslation(word: String, language: String): Single<Translation> {
+    override fun setWords(context: Context, words: List<Word>) {
+        val db = AppDatabase.create(context)
+
+        db.clearAllTables()
+
+        for (word in words) {
+            val dbWord = DbWord(originalText = word.originalText,
+                originalLanguage = word.originalLanguage,
+                translatedText = word.translatedText,
+                translatedLanguage = word.translatedLanguage)
+
+            db.wordDao().insert(dbWord)
+        }
+    }
+
+    override fun getTranslation(originalText: String, targetLanguage: String): Single<Word> {
         val queryBody = YandexTranslatorQueryBody(
             folderId = "b1g8hrtq42kmn7g8a469",
-            texts = listOf(word),
-            targetLanguageCode = language
+            texts = listOf(originalText),
+            targetLanguageCode = targetLanguage
         )
         val token =
-            "Bearer CggVAgAAABoBMxKABKrvMe05JSRLGcRqdazoLR7PGumUusw5WOOcF6rYXnn-TzoC39aJas9LibNd0H5Pa5C0jtPgmjh1JP-rR8qz7dXJGyNxuF8zTHhxBoMFKIbwKxGyvMs2Llgo1wSXrUdb2oGesrmvStVV9gSqfn85cD63DBF_9rpWThyb3GNvk4JDDSfGWyreqJbwHIgo3FXJokXJV_yljXi9OZS6UpOiF-Qrz3fp4eFD57mxJnFjQyM9s92aNfKjPRNB7ihm0ScoQLr337Nk3bkk25DL8U0otUOv_Bz56777nG3xVte7ObYeaVCOvmQw8Dkm2mR0J4yBmI-hbXfHoXteT_WXBBgfVggQEV5wqRh3aALMhEyXx_MTNj_hqWkBc9UJkRH0hwmNhz7lFRUKnRIZk-avs5pPzoH5oT3aAOhoYof174LDaboj-Qe3DzCCK__pV37NYPNWhbgezTsXrWeE55bddfvTqrr0ReLnHmXYqr8N1RTerwHsfRHFOrU6gQaFZCsPiTiIfnpwiBZHyvZAAmlw6Z8-aTeAq6wtPeoQjowZQsMA3E0rHEOhxWQH6-M6TgmLxGniLfROv9hyDnZqbEF_bS28NR14NpSX9n3HNkz5zmQDUM73NXYR-25VPQivVXI0R_65SQ2sdu44gPmMdjLRZqUwosXIButlDTzqLbfzglgubesZGiQQ0O3I-AUYkL_L-AUiFgoUYWpldXJrN2NoaTFpNHNtNnNzdm8="
+            "Bearer CggVAgAAABoBMxKABBR98dCLOb4VMyTN7oYe99tQ5lcgP-NGqv2sCI4nr_iWDoSxbvxfTdPE7y782-YPkuqAhiECrqR7CUMp9qgFwSWkBeR5esTkfYTdTyd-zOm9p7L4Pn9UyZ7WMtTsPEB7UMxyeV6NOCMU5gsHhbajb40sT1DSQY-rSCj6RXthzAO2rRTN21Sm455ccIIjiDg6cSimNqMtwBitn3dzhpNeIMjfA4IkVHNnssZ9Q7m5ClRBjyE1tgZjMIsS7C2lltPze7jUThWPORjW_tVofYFwiFpUshQtYXX35B2d9VGNdIPNJjqqPgjSqvlxdxh6vtJD-U_Vmg-qDTPQbkPRrzhZoeZ_ab3JD7p9aKtzzp3nq7BN9uV3F5UxQi_hU91Fhplj791VJVFZ9CCCA8TFLT4lWaZ7Agwm6ux4L6A9CDKDRCF7qwz6eggxM8gfdHTmLZzBdyAB1wCXi7YSxxXR2JJgv9pYDxh3EHU3xTRVPwuheAsSYipt436--i9tBKDuP2gRd4e0-InNNzjbtUkUMcWrrHTCr5bz7TTAKg3txulTA92iHgEpH-mb-a_tIgJS4xIav6uTk0hpdQKXcCr0LkWd-hewNV3XdChw5MwpDMymf20ZiBn5H_u8ocstdXloFsOfBpXwnZJwgFoWM0qRtragAFHjOCU9hXCAJDsK9Rqn6PpSGiQQ3-zR-AUYn77U-AUiFgoUYWpldXJrN2NoaTFpNHNtNnNzdm8="
 
         val result =
             YandexTranslatorApiService.create().getTranslation(
@@ -87,21 +50,11 @@ class RepositoryImpl : Repository {
                 headers = mapOf("Authorization" to token)
             )
 
-//        result.observeOn(AndroidSchedulers.mainThread())
-//            .subscribeOn(Schedulers.io())
-//            .subscribe({ result ->
-//                print("result is ${result.translations[0].text}")
-//                val language = result.translations[0].detectedLanguageCode
-//                val text = result.translations[0].text
-//                translation = Translation(language = language, translation = text)
-//            },
-//                { error ->
-//                    error.printStackTrace()
-//                })
-        val resultToTranslation: (Result) -> Translation =
-            {
-                r: Result -> Translation(translation = r.translations[0].text, language = language)
+        val resultToWord: (Result) -> Word =
+            { r: Result ->
+                Word(originalText = originalText, originalLanguage = r.translations[0].detectedLanguageCode, translatedText = r.translations[0].text, translatedLanguage = targetLanguage)
             }
-        return result.map(resultToTranslation)
+
+        return result.map(resultToWord)
     }
 }
