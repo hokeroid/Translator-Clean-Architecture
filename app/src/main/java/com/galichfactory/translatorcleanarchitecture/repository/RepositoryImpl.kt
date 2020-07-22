@@ -1,14 +1,13 @@
 package com.galichfactory.translatorcleanarchitecture.repository
 
-import android.content.Context
 import com.galichfactory.translatorcleanarchitecture.data.*
 import com.galichfactory.translatorcleanarchitecture.domain.Word
 import io.reactivex.Single
 
 class RepositoryImpl : Repository {
 
-    override fun getWords(context: Context): List<Word> {
-        val db = AppDatabase.create(context)
+    override fun getWords(): List<Word> {
+        val db = AppDatabase.create()
 
         return db.wordDao().getAll().map { dbWord: DbWord ->
             Word(
@@ -20,8 +19,8 @@ class RepositoryImpl : Repository {
         }
     }
 
-    override fun setWords(context: Context, words: List<Word>) {
-        val db = AppDatabase.create(context)
+    override fun setWords(words: List<Word>) {
+        val db = AppDatabase.create()
 
         db.clearAllTables()
 
