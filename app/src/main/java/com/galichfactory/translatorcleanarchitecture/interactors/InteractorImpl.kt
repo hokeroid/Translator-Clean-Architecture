@@ -1,20 +1,29 @@
 package com.galichfactory.translatorcleanarchitecture.interactors
 
 import com.galichfactory.translatorcleanarchitecture.domain.Word
-import com.galichfactory.translatorcleanarchitecture.repository.RepositoryImpl
+import com.galichfactory.translatorcleanarchitecture.repository.ApiRepository
+import com.galichfactory.translatorcleanarchitecture.repository.DbRepository
 import io.reactivex.Single
+import okhttp3.internal.wait
+import javax.inject.Inject
 
-class InteractorImpl: Interactor {
-    val repository = RepositoryImpl()
-    override fun saveDictionary(words: List<Word>) {
-        TODO("Not yet implemented")
+class InteractorImpl @Inject constructor(
+    private val dbRepository: DbRepository,
+    private val apiRepository: ApiRepository
+) : Interactor {
+    override fun saveHistory(words: List<Word>) {
+        dbRepository.setWords(words)
     }
 
-    override fun loadDictionary(): List<Word> {
-        TODO("Not yet implemented")
+    override fun loadHistorySingle(): Single<List<Word>> {
+        return dbRepository.getWords()
     }
 
-    override fun getTranslation(originalText: String, targetLanguage: String): Single<Word> {
-        return repository.getTranslation(originalText, targetLanguage)
+    override fun getTranslation(originalText: String, targetLanguage: String): Single<List<Word>> {
+        apiRepository.getTranslation(originalText, targetLanguage)
+            .subscribe({ word ->
+                dbRepository.insertWord(word).wait()
+            }, { error -> error.printStackTrace() }).dispose()
+        return loadHistorySingle()
     }
 }
