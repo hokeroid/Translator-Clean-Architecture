@@ -19,5 +19,4 @@ class WordListAdapter(private val words: List<Word>): RecyclerView.Adapter<WordV
         val word = words[position]
         holder.bind(word)
     }
-
 }

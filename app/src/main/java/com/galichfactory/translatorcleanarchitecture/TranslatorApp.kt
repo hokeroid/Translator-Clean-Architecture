@@ -16,7 +16,7 @@ class TranslatorApp : Application() {
     }
 
     companion object {
-        @JvmStatic //TODO осознать что это
+        @JvmStatic
         lateinit var appComponent: AppComponent
     }
 }

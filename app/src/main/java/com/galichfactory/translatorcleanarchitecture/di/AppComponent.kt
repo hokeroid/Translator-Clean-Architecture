@@ -28,7 +28,5 @@ interface AppComponent {
 
     fun inject(mainPresenter: MainPresenter)
 
-    //fun inject(mainPresenterProvider: Provider<MainPresenter>)
-
     fun inject(interactor: Interactor)
 }

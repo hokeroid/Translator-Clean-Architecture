@@ -1,6 +1,5 @@
 package com.galichfactory.translatorcleanarchitecture.repository
 
-import com.galichfactory.translatorcleanarchitecture.TranslatorApp
 import com.galichfactory.translatorcleanarchitecture.data.AppDatabase
 import com.galichfactory.translatorcleanarchitecture.data.DbWord
 import com.galichfactory.translatorcleanarchitecture.domain.Word
@@ -9,50 +8,41 @@ import javax.inject.Inject
 
 class DbRepositoryImpl @Inject constructor(private val appDatabase: AppDatabase) : DbRepository {
 
+    private fun DbWord.toWord(): Word {
+        return Word(
+            originalText = this.originalText,
+            originalLanguage = this.originalLanguage,
+            translatedText = this.translatedText,
+            translatedLanguage = this.translatedLanguage
+        )
+    }
+
+    private fun Word.toDbWord(): DbWord {
+        return DbWord(
+            originalText = this.originalText,
+            originalLanguage = this.originalLanguage,
+            translatedText = this.translatedText,
+            translatedLanguage = this.translatedLanguage
+        )
+    }
+
     override fun getWords(): Single<List<Word>> {
         return appDatabase.wordDao().getAll().map { dbWords ->
-            var words: MutableList<Word> = mutableListOf()
-            for (dbWord in dbWords) {
-                words.add(
-                    Word(
-                        originalText = dbWord.originalText,
-                        originalLanguage = dbWord.originalLanguage,
-                        translatedText = dbWord.translatedText,
-                        translatedLanguage = dbWord.translatedLanguage
-                    )
-                )
+            dbWords.map { dbWord ->
+                dbWord.toWord()
             }
-            words.toList()
         }
     }
 
     override fun setWords(words: List<Word>) {
         appDatabase.clearAllTables()
 
-        for (word in words) {
-            val dbWord = DbWord(
-                originalText = word.originalText,
-                originalLanguage = word.originalLanguage,
-                translatedText = word.translatedText,
-                translatedLanguage = word.translatedLanguage
-            )
-
-            appDatabase.wordDao().insert(dbWord)
+        words.map { word ->
+            appDatabase.wordDao().insert(word.toDbWord())
         }
     }
 
     override fun insertWord(word: Word) {
-        val dbWord = DbWord(
-            originalText = word.originalText,
-            originalLanguage = word.originalLanguage,
-            translatedText = word.translatedText,
-            translatedLanguage = word.translatedLanguage
-        )
-
-        appDatabase.wordDao().insert(dbWord)
-    }
-
-    init {
-        TranslatorApp.appComponent.inject(this)
+        appDatabase.wordDao().insert(word.toDbWord())
     }
 }

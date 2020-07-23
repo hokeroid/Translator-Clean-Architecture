@@ -4,7 +4,8 @@ import com.galichfactory.translatorcleanarchitecture.domain.Word
 import com.galichfactory.translatorcleanarchitecture.repository.ApiRepository
 import com.galichfactory.translatorcleanarchitecture.repository.DbRepository
 import io.reactivex.Single
-import okhttp3.internal.wait
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 class InteractorImpl @Inject constructor(
@@ -20,10 +21,13 @@ class InteractorImpl @Inject constructor(
     }
 
     override fun getTranslation(originalText: String, targetLanguage: String): Single<List<Word>> {
-        apiRepository.getTranslation(originalText, targetLanguage)
-            .subscribe({ word ->
-                dbRepository.insertWord(word).wait()
-            }, { error -> error.printStackTrace() }).dispose()
-        return loadHistorySingle()
+        return apiRepository.getTranslation(originalText, targetLanguage)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .map { word ->
+                dbRepository.insertWord(word)
+            }.flatMap { _ ->
+                loadHistorySingle()
+            }
     }
 }
