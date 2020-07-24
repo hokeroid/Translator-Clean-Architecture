@@ -1,12 +1,12 @@
 package com.galichfactory.translatorcleanarchitecture.data
 
 import androidx.room.*
-import io.reactivex.Single
+import io.reactivex.Flowable
 
 @Dao
 interface WordDao {
     @Query("SELECT * FROM DbWord")
-    fun getAll(): Single<List<DbWord>>
+    fun getAll(): Flowable<List<DbWord>>
 
     @Insert
     fun insert(word: DbWord)

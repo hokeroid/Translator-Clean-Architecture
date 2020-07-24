@@ -1,12 +1,10 @@
 package com.galichfactory.translatorcleanarchitecture.repository
 
 import com.galichfactory.translatorcleanarchitecture.domain.Word
-import io.reactivex.Single
+import io.reactivex.Flowable
 
 interface DbRepository {
-    fun getWords(): Single<List<Word>> //TODO -Context +Dagger
-
-    fun setWords(words: List<Word>) //TODO -Context +Dagger
+    fun getWords(): Flowable<List<Word>>
 
     fun insertWord(word: Word)
 }

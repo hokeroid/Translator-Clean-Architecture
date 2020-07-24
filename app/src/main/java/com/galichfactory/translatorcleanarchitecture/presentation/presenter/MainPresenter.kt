@@ -1,6 +1,5 @@
 package com.galichfactory.translatorcleanarchitecture.presentation.presenter
 
-import com.galichfactory.translatorcleanarchitecture.domain.Word
 import com.galichfactory.translatorcleanarchitecture.interactors.Interactor
 import com.galichfactory.translatorcleanarchitecture.presentation.view.MainView
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -14,11 +13,11 @@ class MainPresenter @Inject constructor(private val interactor: Interactor) :
     override fun onFirstViewAttach() {
         super.onFirstViewAttach()
 
-        loadHistory()
+        subscribeOnWordHistory()
     }
 
-    fun loadHistory() {
-        interactor.loadHistorySingle()
+    private fun subscribeOnWordHistory() {
+        interactor.getHistoryObservable()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({ words ->
@@ -29,14 +28,5 @@ class MainPresenter @Inject constructor(private val interactor: Interactor) :
 
     fun translateWord(text: String, lang: String) {
         interactor.getTranslation(text, lang)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                { words: List<Word> ->
-                    viewState.showWords(words)
-                },
-                { error ->
-                    error.printStackTrace()
-                })
     }
 }

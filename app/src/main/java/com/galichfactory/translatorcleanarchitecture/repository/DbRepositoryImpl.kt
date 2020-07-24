@@ -3,7 +3,7 @@ package com.galichfactory.translatorcleanarchitecture.repository
 import com.galichfactory.translatorcleanarchitecture.data.AppDatabase
 import com.galichfactory.translatorcleanarchitecture.data.DbWord
 import com.galichfactory.translatorcleanarchitecture.domain.Word
-import io.reactivex.Single
+import io.reactivex.Flowable
 import javax.inject.Inject
 
 class DbRepositoryImpl @Inject constructor(private val appDatabase: AppDatabase) : DbRepository {
@@ -26,19 +26,9 @@ class DbRepositoryImpl @Inject constructor(private val appDatabase: AppDatabase)
         )
     }
 
-    override fun getWords(): Single<List<Word>> {
-        return appDatabase.wordDao().getAll().map { dbWords ->
-            dbWords.map { dbWord ->
-                dbWord.toWord()
-            }
-        }
-    }
-
-    override fun setWords(words: List<Word>) {
-        appDatabase.clearAllTables()
-
-        words.map { word ->
-            appDatabase.wordDao().insert(word.toDbWord())
+    override fun getWords(): Flowable<List<Word>> {
+        return appDatabase.wordDao().getAll().map { dbWords: List<DbWord> ->
+            dbWords.map { dbWord -> dbWord.toWord() }
         }
     }
 

@@ -25,6 +25,8 @@ class MainActivity : MvpAppCompatActivity(R.layout.activity_main), MainView {
     @Inject
     lateinit var presenterProvider: Provider<MainPresenter>
 
+    private val wordListAdapter = WordListAdapter()
+
     private val presenter by moxyPresenter { presenterProvider.get() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,6 +37,11 @@ class MainActivity : MvpAppCompatActivity(R.layout.activity_main), MainView {
         searchField = findViewById(R.id.searchField)
         languageSpinner = findViewById(R.id.languageSpinner)
         wordsRecyclerView = findViewById(R.id.wordsRecyclerView)
+
+        wordsRecyclerView.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = wordListAdapter
+        }
 
         val spinnerAdapter = ArrayAdapter.createFromResource(
             this,
@@ -54,10 +61,6 @@ class MainActivity : MvpAppCompatActivity(R.layout.activity_main), MainView {
     }
 
     override fun showWords(words: List<Word>) {
-        wordsRecyclerView.apply {
-            layoutManager = LinearLayoutManager(context)
-            adapter = WordListAdapter(words)
-        }
-        wordsRecyclerView.adapter?.notifyDataSetChanged()
+        wordListAdapter.setWords(words)
     }
 }
