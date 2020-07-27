@@ -4,7 +4,7 @@ import com.galichfactory.translatorcleanarchitecture.domain.Word
 import com.galichfactory.translatorcleanarchitecture.repository.ApiRepository
 import com.galichfactory.translatorcleanarchitecture.repository.DbRepository
 import io.reactivex.Flowable
-import io.reactivex.schedulers.Schedulers
+import io.reactivex.Single
 import javax.inject.Inject
 
 class InteractorImpl @Inject constructor(
@@ -16,11 +16,11 @@ class InteractorImpl @Inject constructor(
         return dbRepository.getWords()
     }
 
-    override fun getTranslation(originalText: String, targetLanguage: String) {
-        apiRepository.getTranslation(originalText, targetLanguage)
-            .subscribeOn(Schedulers.io())
-            .subscribe({ word ->
-                dbRepository.insertWord(word)
-            })
+    override fun getTranslation(originalText: String, targetLanguage: String): Single<Word> {
+        return apiRepository
+            .getTranslation(originalText, targetLanguage)
+            .doAfterSuccess { word ->
+                dbRepository.insertWord(word).subscribe { }
+            } //TODO Fix crash when duplicate word
     }
 }

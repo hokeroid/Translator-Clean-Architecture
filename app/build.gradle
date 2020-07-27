@@ -36,12 +36,14 @@ android {
 dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'com.google.android.material:material:1.1.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
 
     def retrofit2_version = "2.9.0"
     def okhttp3_version = "4.8.0"
     def room_version = "2.2.5"
     def moxy_version = "2.1.2"
+    def cicerone_version = "5.1.1"
 
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:${kotlin_version}"
@@ -77,4 +79,7 @@ dependencies {
     kapt "com.github.moxy-community:moxy-compiler:$moxy_version"
     implementation "com.github.moxy-community:moxy-ktx:$moxy_version"
     implementation "com.github.moxy-community:moxy-androidx:$moxy_version"
+
+    //Cicerone
+    implementation "ru.terrakok.cicerone:cicerone:$cicerone_version"
 }
