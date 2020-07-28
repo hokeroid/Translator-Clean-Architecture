@@ -8,8 +8,6 @@ import com.galichfactory.translatorcleanarchitecture.interactors.Interactor
 import com.galichfactory.translatorcleanarchitecture.interactors.InteractorImpl
 import com.galichfactory.translatorcleanarchitecture.presentation.presenter.HistoryPresenter
 import com.galichfactory.translatorcleanarchitecture.presentation.presenter.TranslationPresenter
-import com.galichfactory.translatorcleanarchitecture.presentation.view.history.HistoryFragment
-import com.galichfactory.translatorcleanarchitecture.presentation.view.translation.TranslationFragment
 import com.galichfactory.translatorcleanarchitecture.repository.ApiRepository
 import com.galichfactory.translatorcleanarchitecture.repository.ApiRepositoryImpl
 import com.galichfactory.translatorcleanarchitecture.repository.DbRepository
@@ -64,25 +62,11 @@ class AppModule(private val translatorApp: TranslatorApp) {
     }
 
     @Provides
-    @Singleton
     internal fun provideHistoryPresenter(interactor: Interactor): HistoryPresenter {
         return HistoryPresenter(interactor)
     }
 
     @Provides
-    @Singleton
-    internal fun provideHistoryFragment(): HistoryFragment {
-        return HistoryFragment()
-    }
-
-    @Provides
-    @Singleton
-    internal fun provideTranslationFragment(): TranslationFragment {
-        return TranslationFragment()
-    }
-
-    @Provides
-    @Singleton
     internal fun provideTranslationPresenter(interactor: Interactor): TranslationPresenter {
         return TranslationPresenter(interactor)
     }

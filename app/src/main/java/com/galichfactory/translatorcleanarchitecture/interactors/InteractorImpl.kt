@@ -19,8 +19,10 @@ class InteractorImpl @Inject constructor(
     override fun getTranslation(originalText: String, targetLanguage: String): Single<Word> {
         return apiRepository
             .getTranslation(originalText, targetLanguage)
-            .doAfterSuccess { word ->
-                dbRepository.insertWord(word).subscribe { }
-            } //TODO Fix crash when duplicate word
+            .flatMap { word ->
+                dbRepository
+                    .insertWord(word)
+                    .andThen(Single.just(word))
+            }
     }
 }

@@ -11,7 +11,6 @@ import com.galichfactory.translatorcleanarchitecture.R
 import com.galichfactory.translatorcleanarchitecture.TranslatorApp
 import com.galichfactory.translatorcleanarchitecture.domain.Word
 import com.galichfactory.translatorcleanarchitecture.presentation.presenter.TranslationPresenter
-import com.galichfactory.translatorcleanarchitecture.presentation.view.main.MainActivity
 import kotlinx.android.synthetic.main.fragment_translation.*
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
@@ -55,11 +54,8 @@ class TranslationFragment : MvpAppCompatFragment(), TranslationView {
             presenter.translateWord(text, lang)
         }
 
-        //TODO Cicerone
         historyButton.setOnClickListener {
-            if (activity is MainActivity) {
-                (activity as MainActivity).showHistoryFragment()
-            }
+            presenter.onHistoryButtonClick()
         }
     }
 

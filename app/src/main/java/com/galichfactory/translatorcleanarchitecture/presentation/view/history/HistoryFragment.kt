@@ -2,6 +2,7 @@ package com.galichfactory.translatorcleanarchitecture.presentation.view.history
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +11,6 @@ import com.galichfactory.translatorcleanarchitecture.R
 import com.galichfactory.translatorcleanarchitecture.TranslatorApp
 import com.galichfactory.translatorcleanarchitecture.domain.Word
 import com.galichfactory.translatorcleanarchitecture.presentation.presenter.HistoryPresenter
-import com.galichfactory.translatorcleanarchitecture.presentation.view.main.MainActivity
 import kotlinx.android.synthetic.main.fragment_history.*
 import moxy.MvpAppCompatFragment
 import moxy.ktx.moxyPresenter
@@ -49,11 +49,14 @@ class HistoryFragment : MvpAppCompatFragment(), HistoryView {
             adapter = wordListAdapter
         }
 
-        //TODO Cicerone
         backButton.setOnClickListener {
-            if (activity is MainActivity) {
-                (activity as MainActivity).showTranslationFragment()
-            }
+            presenter.onBackButtonClick()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        Log.d("historyFragment", "History Fragment onDestroy()")
     }
 }
