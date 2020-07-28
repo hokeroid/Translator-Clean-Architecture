@@ -19,8 +19,8 @@ import javax.inject.Provider
 
 class HistoryFragment : MvpAppCompatFragment(), HistoryView {
     @Inject
-    lateinit var presenterProvider: Provider<HistoryPresenter>
-    private val presenter by moxyPresenter { presenterProvider.get() }
+    lateinit var presenterImplProvider: Provider<HistoryPresenter>
+    private val presenter by moxyPresenter { presenterImplProvider.get() }
 
     private val wordListAdapter =
         WordListAdapter()

@@ -4,7 +4,6 @@ import android.app.Application
 import com.galichfactory.translatorcleanarchitecture.di.AppComponent
 import com.galichfactory.translatorcleanarchitecture.di.AppModule
 import com.galichfactory.translatorcleanarchitecture.di.DaggerAppComponent
-import ru.terrakok.cicerone.Cicerone
 import javax.inject.Singleton
 
 @Singleton
@@ -21,7 +20,5 @@ class TranslatorApp : Application() {
     companion object {
         @JvmStatic
         lateinit var appComponent: AppComponent
-
-        val cicerone = Cicerone.create()
     }
 }

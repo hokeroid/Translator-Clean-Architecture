@@ -7,11 +7,14 @@ import com.galichfactory.translatorcleanarchitecture.data.YandexTranslatorApiSer
 import com.galichfactory.translatorcleanarchitecture.interactors.Interactor
 import com.galichfactory.translatorcleanarchitecture.interactors.InteractorImpl
 import com.galichfactory.translatorcleanarchitecture.presentation.presenter.HistoryPresenter
+import com.galichfactory.translatorcleanarchitecture.presentation.presenter.HistoryPresenterImpl
 import com.galichfactory.translatorcleanarchitecture.presentation.presenter.TranslationPresenter
+import com.galichfactory.translatorcleanarchitecture.presentation.presenter.TranslationPresenterImpl
 import com.galichfactory.translatorcleanarchitecture.repository.ApiRepository
 import com.galichfactory.translatorcleanarchitecture.repository.ApiRepositoryImpl
 import com.galichfactory.translatorcleanarchitecture.repository.DbRepository
 import com.galichfactory.translatorcleanarchitecture.repository.DbRepositoryImpl
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -39,35 +42,25 @@ class AppModule(private val translatorApp: TranslatorApp) {
     internal fun provideApiService(): YandexTranslatorApiService {
         return YandexTranslatorApiService.create()
     }
+}
 
-    @Provides
+@Module
+interface BindsAppModule {
+    @Binds
     @Singleton
-    internal fun provideDbRepository(appDatabase: AppDatabase): DbRepository {
-        return DbRepositoryImpl(appDatabase)
-    }
+    fun provideDbRepository(dbRepository: DbRepositoryImpl): DbRepository
 
-    @Provides
+    @Binds
     @Singleton
-    internal fun provideApiRepository(translatorApiService: YandexTranslatorApiService): ApiRepository {
-        return ApiRepositoryImpl(translatorApiService)
-    }
+    fun provideApiRepository(apiRepository: ApiRepositoryImpl): ApiRepository
 
-    @Provides
+    @Binds
     @Singleton
-    internal fun provideInteractor(
-        dbRepository: DbRepository,
-        apiRepository: ApiRepository
-    ): Interactor {
-        return InteractorImpl(dbRepository, apiRepository)
-    }
+    fun provideInteractor(interactor: InteractorImpl): Interactor
 
-    @Provides
-    internal fun provideHistoryPresenter(interactor: Interactor): HistoryPresenter {
-        return HistoryPresenter(interactor)
-    }
+    @Binds
+    fun provideHistoryPresenter(historyPresenter: HistoryPresenterImpl): HistoryPresenter
 
-    @Provides
-    internal fun provideTranslationPresenter(interactor: Interactor): TranslationPresenter {
-        return TranslationPresenter(interactor)
-    }
+    @Binds
+    fun provideTranslationPresenter(translationPresenter: TranslationPresenterImpl): TranslationPresenter
 }
