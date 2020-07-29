@@ -11,8 +11,12 @@ abstract class AppDatabase : RoomDatabase() {
 
     companion object Factory {
         fun create(context: Context): AppDatabase {
-            return Room.databaseBuilder(context, AppDatabase::class.java, "database")
-                .allowMainThreadQueries().fallbackToDestructiveMigration().build()
+            return Room.databaseBuilder(
+                context.applicationContext,
+                AppDatabase::class.java,
+                "database"
+            ).fallbackToDestructiveMigration()
+                .build()
         }
     }
 }
